@@ -5,21 +5,18 @@ import 'package:flutter/services.dart';
 class FlutterPluginDemo {
   static const MethodChannel _channel =
       const MethodChannel('flutter_plugin_demo');
-  static const EventChannel _eventChannel =
-      EventChannel("flutter_plugin_event");
+  static const EventChannel _eventChannel = EventChannel("flutter_plugin_event");
 
-  static StreamController<String> streamController = StreamController<String>.broadcast();
+  static StreamController<String> streamController =
+      StreamController<String>.broadcast();
 
-
-  /// 问题是这里没有主动调用
-  FlutterPluginDemo() {
-    print('FLutter 构造方法');
+  static init() {
     _eventChannel.receiveBroadcastStream().listen((data) {
       streamController.sink.add(data);
     });
   }
 
-  static dispose(){
+  static dispose() {
     streamController.close();
   }
 
