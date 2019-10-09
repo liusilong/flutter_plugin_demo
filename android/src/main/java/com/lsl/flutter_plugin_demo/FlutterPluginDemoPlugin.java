@@ -28,9 +28,13 @@ public class FlutterPluginDemoPlugin implements MethodCallHandler {
     private EventChannel.EventSink eventSink;
     private Application.ActivityLifecycleCallbacks lifecycleCallbacks;
 
-    public FlutterPluginDemoPlugin(Registrar registrar) {
+    private final PluginDelegate delegate;
+
+
+    public FlutterPluginDemoPlugin(Registrar registrar, PluginDelegate delegate) {
         this.registrar = registrar;
         this.context = registrar.context();
+        this.delegate = delegate;
         final EventChannel eventChannel = new EventChannel(registrar.messenger(), "flutter_plugin_event");
         eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
             @Override
@@ -43,6 +47,18 @@ public class FlutterPluginDemoPlugin implements MethodCallHandler {
                 FlutterPluginDemoPlugin.this.eventSink = null;
             }
         });
+
+
+        // 声明周期回调
+        ((Application) context).registerActivityLifecycleCallbacks(delegate);
+
+        // 权限声明回调
+        registrar.addRequestPermissionsResultListener(delegate);
+
+        // 页面跳转回调
+        registrar.addActivityResultListener(delegate);
+
+
 
         // 注册声明周期方法的监听
         ((Application) registrar.context())
@@ -71,8 +87,8 @@ public class FlutterPluginDemoPlugin implements MethodCallHandler {
      */
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_plugin_demo");
-        channel.setMethodCallHandler(new FlutterPluginDemoPlugin(registrar));
-
+        final PluginDelegate delegate = new PluginDelegate(registrar);
+        channel.setMethodCallHandler(new FlutterPluginDemoPlugin(registrar, delegate));
     }
 
     @Override
@@ -88,6 +104,13 @@ public class FlutterPluginDemoPlugin implements MethodCallHandler {
             }
         } else {
             result.notImplemented();
+        }
+
+        // 调用代理类方法演示
+        if (call.method.equals("methodA")) {
+            delegate.methodA(call, result);
+        }else if(call.method.equals("methodB")){
+            delegate.methodB(call, result);
         }
     }
 
