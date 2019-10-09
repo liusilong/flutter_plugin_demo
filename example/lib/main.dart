@@ -41,18 +41,35 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    FlutterPluginDemo.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body: Column(
+          children: <Widget>[
+            Center(
+              child: Text('Running on: $_platformVersion\n'),
+            ),
+            StreamBuilder<String>(
+              initialData: '还没有收到原始端的消息',
+              stream: FlutterPluginDemo.streamController.stream,
+              builder: (context, snapshot){
+                return Text(snapshot.data);
+              },
+            )
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            await FlutterPluginDemo.showToast();
+            await FlutterPluginDemo.showToast(message: "测试调用方法的时候传递参数");
           },
           child: Icon(Icons.add),
         ),
